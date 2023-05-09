@@ -1,0 +1,382 @@
+<?xml version="1.0"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <artifactId>online-shop</artifactId>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compiler-plugin.version}</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                    <showWarnings>true</showWarnings>
+                    <source>17</source>
+                    <target>17</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>0.2.0</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <!-- For local dynamodb sqllite native lib-->
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <includeScope>test</includeScope>
+                            <includeTypes>so,dll,dylib</includeTypes>
+                            <outputDirectory>${project.basedir}/native-libs</outputDirectory>
+                        </configuration>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <id>copy</id>
+                        <phase>test-compile</phase>
+                    </execution>
+                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <version>3.3.0</version>
+            </plugin>
+            <!-- Configure's OpenAPI Generator -->
+            <plugin>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <artifactVersion>${project.version}</artifactVersion>
+                            <configOptions>
+                                <apiPackage>com.onlineshop.api</apiPackage>
+                                <dateLibrary>java8</dateLibrary>
+                                <interfaceOnly>true</interfaceOnly>
+                                <invokerPackage>com.onlineshop.api</invokerPackage>
+                                <java8>true</java8>
+                                <modelPackage>com.onlineshop.api.dto</modelPackage>
+                                <serializableModel>true</serializableModel>
+                                <sortModelPropertiesByRequiredFlag>true</sortModelPropertiesByRequiredFlag>
+                                <sourceFolder>target/generated-sources/openapi</sourceFolder>
+                                <useSwaggerAnnotations>false</useSwaggerAnnotations>
+                                <useTags>true</useTags>
+                            </configOptions>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generatorName>jaxrs-spec</generatorName>
+                            <groupId>${project.groupId}</groupId>
+                            <inputSpec>${project.basedir}/api/api.yaml</inputSpec>
+                            <library>quarkus</library>
+                            <modelNameSuffix>DTO</modelNameSuffix>
+                            <output>${project.basedir}</output>
+                            <skipOverwrite>false</skipOverwrite>
+                        </configuration>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+                <groupId>org.openapitools</groupId>
+                <version>5.1.1</version>
+            </plugin>
+            <plugin>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>generate-code</goal>
+                            <goal>generate-code-tests</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <extensions>true</extensions>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <version>${quarkus.platform.version}</version>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>${skipSurefire}</skip>
+                    <systemPropertyVariables>
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                        <maven.home>${maven.home}</maven.home>
+                        <maven.settings>${session.request.userSettingsFile.path}</maven.settings>
+                    </systemPropertyVariables>
+                </configuration>
+                <version>${surefire-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                                <maven.home>${maven.home}</maven.home>
+                                <native.image.path>${project.build.directory}/${project.build.finalName}-runner
+                                </native.image.path>
+                                <sqlite4java.library.path>${project.build.directory}/native-libs
+                                </sqlite4java.library.path>
+                            </systemPropertyVariables>
+                        </configuration>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <version>${surefire-plugin.version}</version>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+        <dependency>
+            <artifactId>commons-lang3</artifactId>
+            <groupId>org.apache.commons</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>quarkus-resteasy-jackson</artifactId>
+            <groupId>io.quarkus</groupId>
+            <!--            <exclusions>-->
+            <!--                <exclusion>-->
+            <!--                    &lt;!&ndash; exclude v2.6.2 for CVE CVE-2017-5645 &ndash;&gt;-->
+            <!--                    <groupId>org.apache.logging.log4j</groupId>-->
+            <!--                    <artifactId>log4j-core</artifactId>-->
+            <!--                </exclusion>-->
+            <!--                <exclusion>-->
+            <!--                    &lt;!&ndash; exclude v2.6.2 for CVE CVE-2017-5645 &ndash;&gt;-->
+            <!--                    <groupId>org.apache.logging.log4j</groupId>-->
+            <!--                    <artifactId>log4j-api</artifactId>-->
+            <!--                </exclusion>-->
+            <!--            </exclusions>-->
+        </dependency>
+        <dependency>
+            <artifactId>quarkus-arc</artifactId>
+            <groupId>io.quarkus</groupId>
+        </dependency>
+        <!--    <dependency>-->
+        <!--      <artifactId>quarkus-amazon-lambda-rest</artifactId>-->
+        <!--      <groupId>io.quarkus</groupId>-->
+        <!--    </dependency>-->
+        <dependency>
+            <artifactId>quarkus-amazon-dynamodb</artifactId>
+            <groupId>${quarkiverse.amazonservices.group-id}</groupId>
+            <version>${quarkus-amazon-dynamodb.version}</version>
+            <exclusions>
+                <exclusion>
+                    <!-- exclude v2.6.2 for CVE CVE-2017-5645 -->
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <!-- exclude v2.6.2 for CVE CVE-2017-5645 -->
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <artifactId>quarkus-smallrye-openapi</artifactId>
+            <groupId>io.quarkus</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>mapstruct</artifactId>
+            <groupId>org.mapstruct</groupId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+        <!--    <dependency>-->
+        <!--      <artifactId>mapstruct-processor</artifactId>-->
+        <!--      <groupId>org.mapstruct</groupId>-->
+        <!--      <scope>provided</scope>-->
+        <!--      <version>${mapstruct.version}</version>-->
+        <!--    </dependency>-->
+        <dependency>
+            <artifactId>lombok</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <scope>provided</scope>
+            <version>${lombok.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>quarkus-hibernate-validator</artifactId>
+            <groupId>io.quarkus</groupId>
+        </dependency>
+
+        <!-- test -->
+        <dependency>
+            <artifactId>quarkus-junit5</artifactId>
+            <groupId>io.quarkus</groupId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <artifactId>quarkus-junit5-mockito</artifactId>
+            <groupId>io.quarkus</groupId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <artifactId>rest-assured</artifactId>
+            <groupId>io.rest-assured</groupId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <artifactId>assertj-core</artifactId>
+            <groupId>org.assertj</groupId>
+            <scope>test</scope>
+            <version>3.22.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.13.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.13.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>DynamoDBLocal</artifactId>
+            <version>${com.amazonaws.DynamoDBLocal.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <!-- exclude v2.6.2 for CVE CVE-2017-5645 -->
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <!-- exclude v2.6.2 for CVE CVE-2017-5645 -->
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+
+        <!-- AWS -->
+        <dependency>
+            <artifactId>dynamodb-enhanced</artifactId>
+            <groupId>software.amazon.awssdk</groupId>
+            <version>${software.amazon.awssdk.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>url-connection-client</artifactId>
+            <groupId>software.amazon.awssdk</groupId>
+            <version>${software.amazon.awssdk.version}</version>
+        </dependency>
+    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <artifactId>${quarkus.platform.artifact-id}</artifactId>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <scope>import</scope>
+                <type>pom</type>
+                <version>${quarkus.platform.version}</version>
+            </dependency>
+            <dependency>
+                <artifactId>quarkus-amazon-services-bom</artifactId>
+                <groupId>io.quarkus.platform</groupId>
+                <scope>import</scope>
+                <type>pom</type>
+                <version>${quarkus.platform.version}</version>
+            </dependency>
+            <dependency>
+                <artifactId>bom</artifactId>
+                <groupId>software.amazon.awssdk</groupId>
+                <scope>import</scope>
+                <type>pom</type>
+                <version>${software.amazon.awssdk.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+    <groupId>com.online-shop</groupId>
+    <modelVersion>4.0.0</modelVersion>
+    <name>online-shop</name>
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>native</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <configuration>
+                                    <systemPropertyVariables>
+                                        <java.util.logging.manager>org.jboss.logmanager.LogManager
+                                        </java.util.logging.manager>
+                                        <maven.home>${maven.home}</maven.home>
+                                        <native.image.path>
+                                            ${project.build.directory}/${project.build.finalName}-runner
+                                        </native.image.path>
+                                    </systemPropertyVariables>
+                                </configuration>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <version>${surefire-plugin.version}</version>
+                    </plugin>
+                </plugins>
+            </build>
+            <id>native</id>
+            <properties>
+                <quarkus.package.type>native</quarkus.package.type>
+            </properties>
+        </profile>
+    </profiles>
+    <properties>
+        <assembly-plugin.version>3.1.0</assembly-plugin.version>
+        <com.amazonaws.DynamoDBLocal.version>1.21.1</com.amazonaws.DynamoDBLocal.version>
+        <compiler-plugin.version>3.8.1</compiler-plugin.version>
+        <failsafe.useModulePath>false</failsafe.useModulePath>
+        <lombok.version>1.18.26</lombok.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <maven.compiler.parameters>true</maven.compiler.parameters>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <quarkiverse.amazonservices.group-id>io.quarkiverse.amazonservices</quarkiverse.amazonservices.group-id>
+        <quarkus-amazon-dynamodb.version>1.1.1</quarkus-amazon-dynamodb.version>
+        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+        <quarkus.platform.version>2.10.3.Final</quarkus.platform.version>
+        <software.amazon.awssdk.version>2.17.176</software.amazon.awssdk.version>
+        <surefire-plugin.version>3.1.0</surefire-plugin.version>
+    </properties>
+    <!--  <repositories>-->
+    <!--    <repository>-->
+    <!--      <id>dynamodblocal</id>-->
+    <!--      <name>AWS DynamoDB Local Release Repository</name>-->
+    <!--      <url>https://s3-us-west-2.amazonaws.com/dynamodb-local/release</url>-->
+    <!--    </repository>-->
+    <!--  </repositories>-->
+    <version>1.0.0</version>
+</project>

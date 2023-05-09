@@ -1,0 +1,369 @@
+openapi: 3.0.3
+info:
+  title: OnlineShop
+  version: 1.0.0
+servers:
+  - url: https://localhost:8080/
+security:
+  - bearerAuth: [ ]
+paths:
+  /products:
+    get:
+      operationId: GetProducts
+      tags: [ shop ]
+      summary: Returns a list of products.
+      parameters:
+        - $ref: '#/components/parameters/LastKey'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          $ref: '#/components/responses/ProductsResponse'
+        '400':
+          $ref: '#/components/responses/400-BadRequest'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+        default:
+          $ref: '#/components/responses/GenericError'
+  /products/{productId}:
+    get:
+      operationId: GetProduct
+      tags: [ shop ]
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      summary: Returns a single product.
+      responses:
+        '200':
+          $ref: '#/components/responses/ProductResponse'
+        '400':
+          $ref: '#/components/responses/400-BadRequest'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+        default:
+          $ref: '#/components/responses/GenericError'
+  /customers/{customerId}:
+    get:
+      operationId: GetCustomer
+      tags: [ shop ]
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+      summary: Return the customerId
+      responses:
+        '200':
+          $ref: '#/components/responses/CustomerResponse'
+  /customers/{customerId}/orders:
+    get:
+      operationId: GetOrdersForCustomer
+      tags: [ shop ]
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+        - $ref: '#/components/parameters/LastKey'
+        - $ref: '#/components/parameters/PageSize'
+      summary: Get all orders for a customer
+      responses:
+        '200':
+          $ref: '#/components/responses/OrdersResponse'
+  /customers:
+    get:
+      operationId: GetCustomers
+      tags: [ shop ]
+      summary: Return the customers
+      parameters:
+        - $ref: '#/components/parameters/LastKey'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          $ref: '#/components/responses/CustomersResponse'
+  /orders:
+    get:
+      operationId: GetAllOrders
+      tags: [ shop ]
+      summary: Get all orders
+      parameters:
+        - $ref: '#/components/parameters/LastKey'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          $ref: '#/components/responses/OrdersResponse'
+    post:
+      operationId: CreateOrder
+      tags: [ shop ]
+      summary: Create Order for Customer
+      requestBody:
+        $ref: '#/components/requestBodies/OrderCreateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/OrderResponse'
+
+  /orders/{orderId}:
+    get:
+      operationId: GetSingleOrder
+      tags: [ shop ]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      summary: Get a single order
+      responses:
+        '200':
+          $ref: '#/components/responses/OrderDetailedResponse'
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    400-BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    404-NotFound:
+      description: Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    409-Conflict:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    GenericError:
+      description: Error found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    ProductsResponse:
+      description: Products
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PagedProducts'
+    ProductResponse:
+      description: Single Product
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Product'
+    CustomerResponse:
+      description: Customers
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Customer'
+    CustomersResponse:
+      description: Customers
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PagedCustomers'
+    OrdersResponse:
+      description: Orders found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PagedOrders'
+    OrderResponse:
+      description: Order
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Order'
+    OrderDetailedResponse:
+      description: Order Detailed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderDetailed'
+  requestBodies:
+    OrderCreateRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderCreate'
+  parameters:
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/ProductId'
+    CustomerId:
+      name: customerId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/CustomerId'
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/OrderId'
+    LastKey:
+      name: lastKey
+      in: query
+      required: false
+      schema:
+        type: string
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 10
+        maximum: 100
+  schemas:
+    ProblemDetails:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+    # ********** Product Schemas *************
+    ProductId:
+      description: Product Identifier
+      type: string
+      format: uuid
+    Product:
+      description: Product Detailed
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ProductId'
+        name:
+          type: string
+        price:
+          type: number
+    #        category:
+    #          type: string
+    #          enum: []
+    CustomerId:
+      description: The customer identifier
+      type: string
+      format: uuid
+    Customer:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/CustomerId'
+        name:
+          type: string
+        lastOrder:
+          type: string
+          format: date-time
+        address:
+          $ref: '#/components/schemas/Address'
+    CustomerWithOrders:
+      allOf:
+        - $ref: '#/components/schemas/Customer'
+        - type: array
+          items:
+            $ref: '#/components/schemas/Order'
+    PagedOrders:
+      type: object
+      properties:
+        lastKey:
+          type: string
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+    PagedCustomers:
+      type: object
+      properties:
+        lastKey:
+          type: string
+        customers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
+    PagedProducts:
+      type: object
+      properties:
+        lastKey:
+          type: string
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        zipcode:
+          type: string
+        state:
+          type: string
+
+    OrderId:
+      description: Order Identifier
+      type: string
+      format: uuid
+    OrderCreate:
+      description: Order create
+      type: object
+      properties:
+        customerId:
+          $ref: '#/components/schemas/CustomerId'
+        items:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            type: object
+            properties:
+              productId:
+                $ref: '#/components/schemas/ProductId'
+              quantity:
+                type: integer
+                format: int32
+    Order:
+      description: Order
+      required: [ orderId,customerId ]
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/OrderId'
+        customerId:
+          $ref: '#/components/schemas/CustomerId'
+        total:
+          type: number
+        lastUpdated:
+          type: string
+          format: date-time
+    OrderDetailed:
+      allOf:
+        - $ref: '#/components/schemas/Order'
+        - type: object
+          properties:
+            customer:
+              $ref: '#/components/schemas/Customer'
+            items:
+              type: array
+              minItems: 1
+              maxItems: 10
+              items:
+                $ref: '#/components/schemas/OrderItem'
+    OrderItem:
+      description: Order item
+      type: object
+      properties:
+        productId:
+          $ref: '#/components/schemas/ProductId'
+        quantity:
+          type: integer
+          format: int32
+        price:
+          type: number

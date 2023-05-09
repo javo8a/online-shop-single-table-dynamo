@@ -1,0 +1,14 @@
+[
+  '{{repeat(50, 100)}}',
+  {
+    customerId: '{{guid()}}',
+    name: '{{firstName()}} {{surname()}}',
+    address:
+      {
+        street: '{{street()}}',
+        city: '{{city()}}',
+        state: '{{state()}}',
+        zipcode: '{{integer(501,99950,"00000")}}'
+      }
+  }
+]

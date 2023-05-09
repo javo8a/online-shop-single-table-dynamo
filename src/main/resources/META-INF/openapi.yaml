@@ -1,0 +1,702 @@
+openapi: 3.0.3
+info:
+  title: Equipment List Deviation Owner
+  version: 1.0.0
+servers:
+- url: https://localhost:8080/
+security:
+- bearerAuth: []
+tags:
+- description: Non-Essential Furnishing Items API
+  name: NEF
+- description: Minimum Equipment List Items and Revisions
+  name: MEL
+paths:
+  /nef-items:
+    get:
+      operationId: GetNefItems
+      parameters:
+      - explode: false
+        in: path
+        name: nefId
+        required: true
+        schema:
+          $ref: '#/components/schemas/NefId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/NefItem'
+                type: array
+          description: Nef Items response as list
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Resource does not exist
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Error found
+      summary: Returns the NEF Items.
+      tags:
+      - NEF
+      x-accepts: application/json
+      x-tags:
+      - tag: NEF
+  /nef-items/{nefId}:
+    get:
+      operationId: GetOneNefItem
+      parameters:
+      - explode: false
+        in: path
+        name: nefId
+        required: true
+        schema:
+          $ref: '#/components/schemas/NefId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NefItemDetailed'
+          description: Nef Item detailed response
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Resource does not exist
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Error found
+      summary: Return a single NEF Item with all details
+      tags:
+      - NEF
+      x-accepts: application/json
+      x-tags:
+      - tag: NEF
+  /mel-revisions:
+    get:
+      operationId: SearchMELRevisions
+      parameters:
+      - explode: true
+        in: query
+        name: fleetId
+        required: false
+        schema:
+          $ref: '#/components/schemas/FleetId'
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/MEL.RevisionSummary'
+                type: array
+          description: List of MEL Revisions
+      summary: Return Active MEL Revisions based on specific FleetIdParameter or if
+        missing will return all
+      tags:
+      - MEL
+      x-accepts: application/json
+      x-tags:
+      - tag: MEL
+    post:
+      operationId: CreateMELRevision
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MEL.RevisionInput'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MEL.RevisionDetailed'
+          description: Single MEL Revision detailed
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Resource already exists
+      summary: Create a new revision
+      tags:
+      - MEL
+      x-contentType: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: MEL
+  /mel-revisions/{revisionNumber}:
+    delete:
+      operationId: CloseMELRevision
+      parameters:
+      - explode: false
+        in: path
+        name: revisionNumber
+        required: true
+        schema:
+          $ref: '#/components/schemas/MELRevisionNumber'
+        style: simple
+      responses:
+        "202":
+          description: Accepted
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Resource does not exist
+      summary: Close MEL Revision
+      tags:
+      - MEL
+      x-accepts: application/json
+      x-tags:
+      - tag: MEL
+    get:
+      operationId: GetMELRevision
+      parameters:
+      - explode: false
+        in: path
+        name: revisionNumber
+        required: true
+        schema:
+          $ref: '#/components/schemas/MELRevisionNumber'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MEL.RevisionDetailed'
+          description: Single MEL Revision detailed
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Resource does not exist
+      summary: Retrieve a specific revision
+      tags:
+      - MEL
+      x-accepts: application/json
+      x-tags:
+      - tag: MEL
+    patch:
+      operationId: UpdateMELRevision
+      parameters:
+      - explode: false
+        in: path
+        name: revisionNumber
+        required: true
+        schema:
+          $ref: '#/components/schemas/MELRevisionNumber'
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/MELRevisionRequest'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MEL.RevisionDetailed'
+          description: Single MEL Revision detailed
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Resource does not exist
+      summary: Update MEL Revision
+      tags:
+      - MEL
+      x-contentType: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: MEL
+    put:
+      operationId: PublishMELRevision
+      parameters:
+      - explode: false
+        in: path
+        name: revisionNumber
+        required: true
+        schema:
+          $ref: '#/components/schemas/MELRevisionNumber'
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/MELRevisionRequest'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MEL.RevisionDetailed'
+          description: Single MEL Revision detailed
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Resource does not exist
+      summary: Publish MEL Revision
+      tags:
+      - MEL
+      x-contentType: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: MEL
+  /mel-revisions/{revisionNumber}/stagedItems:
+    get:
+      operationId: GetStagedItemsForRevision
+      parameters:
+      - explode: false
+        in: path
+        name: revisionNumber
+        required: true
+        schema:
+          $ref: '#/components/schemas/MELRevisionNumber'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/MEL.ItemStagedSummary'
+                type: array
+          description: List of MEL Staged Items for a revision
+      summary: Get all staged items within this revision
+      tags:
+      - MEL
+      x-accepts: application/json
+      x-tags:
+      - tag: MEL
+    post:
+      operationId: AddMELItemsToRevision
+      parameters:
+      - explode: false
+        in: path
+        name: revisionNumber
+        required: true
+        schema:
+          $ref: '#/components/schemas/MELRevisionNumber'
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/AddMELItemsToRevisionRequest'
+      responses:
+        "202":
+          description: Accepted
+      summary: Create Staged Item(s) in Revision - new, from existing MEL Item or
+        from a whole fleet.
+      tags:
+      - MEL
+      x-contentType: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: MEL
+components:
+  parameters:
+    NefId:
+      explode: false
+      in: path
+      name: nefId
+      required: true
+      schema:
+        $ref: '#/components/schemas/NefId'
+      style: simple
+    FleetIdParameter:
+      explode: true
+      in: query
+      name: fleetId
+      required: false
+      schema:
+        $ref: '#/components/schemas/FleetId'
+      style: form
+    MELRevisionNumberParameter:
+      explode: false
+      in: path
+      name: revisionNumber
+      required: true
+      schema:
+        $ref: '#/components/schemas/MELRevisionNumber'
+      style: simple
+  requestBodies:
+    MELRevisionRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MEL.revisionBase'
+    AddMELItemsToRevisionRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MEL.ItemBase'
+  responses:
+    "400-BadRequest":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+      description: Bad Request
+    "404-NotFound":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+      description: Resource does not exist
+    "409-Conflict":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+      description: Resource already exists
+    GenericError:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+      description: Error found
+    NefItemResponse:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NefItemDetailed'
+      description: Nef Item detailed response
+    NefItemsResponse:
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: '#/components/schemas/NefItem'
+            type: array
+      description: Nef Items response as list
+    MELRevisionResponse:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MEL.RevisionDetailed'
+      description: Single MEL Revision detailed
+    MELRevisionsResponse:
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: '#/components/schemas/MEL.RevisionSummary'
+            type: array
+      description: List of MEL Revisions
+    MELStagedItemsResponse:
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: '#/components/schemas/MEL.ItemStagedSummary'
+            type: array
+      description: List of MEL Staged Items for a revision
+  schemas:
+    ProblemDetails:
+      properties:
+        status:
+          format: int32
+          type: integer
+        detail:
+          type: string
+      type: object
+    NefId:
+      description: Nef Item Identifier
+      format: uuid
+      type: string
+    AtaCode:
+      description: ATA Code describing the ATA Chapter for this item (four digits)
+      pattern: '[0-9]{4}'
+      type: string
+    NefItem:
+      example:
+        nefId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        ataCode: ataCode
+        desc: desc
+      properties:
+        nefId:
+          description: Nef Item Identifier
+          format: uuid
+          type: string
+        ataCode:
+          description: ATA Code describing the ATA Chapter for this item (four digits)
+          pattern: '[0-9]{4}'
+          type: string
+        desc:
+          description: NEF Item Description
+          type: string
+      type: object
+    NefItemDetailed:
+      allOf:
+      - $ref: '#/components/schemas/NefItem'
+      - $ref: '#/components/schemas/NefItemDetailed_allOf'
+    CopyFromMELItems:
+      properties:
+        Source:
+          $ref: '#/components/schemas/CopyFromMELItems_Source'
+        Target:
+          $ref: '#/components/schemas/CopyFromMELItems_Source'
+      type: object
+    FleetId:
+      type: string
+    Subfleets:
+      items:
+        type: string
+      type: array
+    DeferralCode:
+      enum:
+      - MEL
+      - SPL
+      - CDL
+      type: string
+    DeferralNumber:
+      type: string
+    MELRevisionNumber:
+      pattern: '[0-9]{2}\.[0-9]{2}'
+      type: string
+    MELDeferralTime:
+      enum:
+      - ""
+      - CalendarDays
+      - Cycles
+      - FlightDays
+      - FlyingTime
+      type: string
+    MEL.RevisionInput:
+      properties:
+        revisionNumber:
+          pattern: '[0-9]{2}\.[0-9]{2}'
+          type: string
+        description:
+          maxLength: 512
+          type: string
+        fleetId:
+          type: string
+      required:
+      - description
+      - fleetId
+      - revisionNumber
+      type: object
+    MEL.revisionBase:
+      allOf:
+      - $ref: '#/components/schemas/MEL.RevisionInput'
+      - $ref: '#/components/schemas/MEL_revisionBase_allOf'
+    MEL.RevisionSummary:
+      allOf:
+      - $ref: '#/components/schemas/MEL.revisionBase'
+      - $ref: '#/components/schemas/MEL_RevisionSummary_allOf'
+    MEL.RevisionDetailed:
+      allOf:
+      - $ref: '#/components/schemas/MEL.RevisionSummary'
+      - $ref: '#/components/schemas/MEL_RevisionDetailed_allOf'
+    MEL.ItemBase:
+      properties:
+        fleetIdParameter:
+          type: string
+        subfleets:
+          items:
+            type: string
+          type: array
+        deferralCode:
+          $ref: '#/components/schemas/DeferralCode'
+        deferralNumber:
+          type: string
+        description:
+          type: string
+      type: object
+    MEL.ItemDetailed:
+      allOf:
+      - $ref: '#/components/schemas/MEL.ItemBase'
+      - $ref: '#/components/schemas/MEL_ItemDetailed_allOf'
+    MEL.ItemStagedSummary:
+      allOf:
+      - $ref: '#/components/schemas/MEL.ItemBase'
+      - $ref: '#/components/schemas/MEL_ItemStagedSummary_allOf'
+    MEL.ItemStagedDetailed:
+      allOf:
+      - $ref: '#/components/schemas/MEL.ItemDetailed'
+      - $ref: '#/components/schemas/MEL_ItemStagedSummary_allOf'
+    MEL.ItemPublishedSummary:
+      allOf:
+      - $ref: '#/components/schemas/MEL.ItemBase'
+      - $ref: '#/components/schemas/MEL_ItemPublishedSummary_allOf'
+    MEL.CoreData:
+      properties:
+        deferralTimeOne:
+          $ref: '#/components/schemas/MELDeferralTime'
+        allowableTimeOne:
+          type: integer
+        minimumAlertLevelOne:
+          type: integer
+        deferralTimeTwo:
+          $ref: '#/components/schemas/MELDeferralTime'
+        allowableTimeTwo:
+          type: integer
+        minimumAlertLevelTwo:
+          type: integer
+        repetitiveCheckRequired:
+          type: boolean
+        etopsRestriction:
+          enum:
+          - ""
+          - NA
+          - "60"
+          - "120"
+          - "80"
+          type: string
+        dispatchApproval:
+          type: boolean
+      type: object
+    MEL.MCCData:
+      properties:
+        quickMELIndicator:
+          type: boolean
+        ronPriority:
+          enum:
+          - Unprioritized
+          - A Priority
+          - B Priority
+          - C Priority
+          - D Priority
+          type: string
+      type: object
+    MEL.PerformanceData:
+      additionalProperties: true
+      type: object
+    MEL.FlightControlData:
+      additionalProperties: true
+      type: object
+    MEL.LoadControlData:
+      properties:
+        loadingRestrictions:
+          type: boolean
+        stationProcedures:
+          maxLength: 512
+          type: string
+      type: object
+    NefItemDetailed_allOf:
+      properties:
+        notes:
+          description: NEF Item notes
+          maxLength: 1024
+          type: string
+        deferralItemNumber:
+          description: Deferral item number??
+          type: string
+        crewDeferral:
+          description: Whether it can be deferred by crew or not
+          type: boolean
+        sceptreAutoDeferralComment:
+          description: Comment to be added in SCEPTRE for auto-deferrals
+          type: string
+      type: object
+    CopyFromMELItems_Source:
+      properties:
+        fleetId:
+          type: string
+        subfleets:
+          items:
+            type: string
+          type: array
+        deferralNumber:
+          type: string
+      type: object
+    MEL_revisionBase_allOf:
+      properties:
+        createdBy:
+          type: string
+        lastUpdated:
+          format: date-time
+          type: string
+        publicationStatus:
+          enum:
+          - Published
+          - NotPublished
+          type: string
+      type: object
+    MEL_RevisionSummary_allOf:
+      properties:
+        melCount:
+          minimum: 0
+          type: integer
+        addedCount:
+          minimum: 0
+          type: integer
+        updatedCount:
+          minimum: 0
+          type: integer
+        deletedCount:
+          minimum: 0
+          type: integer
+      type: object
+    MEL_RevisionDetailed_allOf:
+      properties:
+        melStagedItems:
+          items:
+            $ref: '#/components/schemas/MEL.ItemStagedSummary'
+          type: array
+      type: object
+    MEL_ItemDetailed_allOf:
+      properties:
+        coreData:
+          $ref: '#/components/schemas/MEL.CoreData'
+        mccData:
+          $ref: '#/components/schemas/MEL.MCCData'
+        mELPerformanceData:
+          additionalProperties: true
+          type: object
+        flightControlData:
+          additionalProperties: true
+          type: object
+        loadControlData:
+          $ref: '#/components/schemas/MEL.LoadControlData'
+      type: object
+    MEL_ItemStagedSummary_allOf:
+      properties:
+        revisionNumber:
+          pattern: '[0-9]{2}\.[0-9]{2}'
+          type: string
+      type: object
+    MEL_ItemPublishedSummary_allOf:
+      properties:
+        publishedBy:
+          type: string
+        publishedOn:
+          format: date-time
+          type: string
+        publishedOnRevisionNumber:
+          pattern: '[0-9]{2}\.[0-9]{2}'
+          type: string
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
