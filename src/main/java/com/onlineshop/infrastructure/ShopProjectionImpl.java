@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import javax.enterprise.context.ApplicationScoped;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
@@ -118,7 +119,7 @@ public class ShopProjectionImpl implements ShopProjection {
    */
   private Map<String, AttributeValue> decodeExclusiveStartKey(String input) {
     try {
-      if (input == null) return null;
+      if (StringUtils.isBlank(input)) return null;
       String json = new String(Base64.getDecoder().decode(input));
 
       TypeReference<HashMap<String, AttributeValueLocal>> typeRef = new TypeReference<>() {};

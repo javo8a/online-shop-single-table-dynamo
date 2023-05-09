@@ -46,9 +46,8 @@ public class DynamoDBHandler {
   @Getter private DynamoDbTable<CustomerDAO> customerTable;
   @Getter private DynamoDbTable<OrderItemDAO> orderItemTable;
   @Getter private DynamoDbTable<CustomerOrderDAO> customerOrderTable;
-  
-  @Getter private DynamoDbEnhancedClient enhancedClient;
 
+  @Getter private DynamoDbEnhancedClient enhancedClient;
 
   public DynamoDBHandler(DynamoDbClient dynamoDbClient, ObjectMapper objectMapper) {
     this.dynamoDbClient = dynamoDbClient;
@@ -71,6 +70,8 @@ public class DynamoDBHandler {
     if (tableExists(this.tableName)) {
       logger.info("Table={} already exists", this.tableName);
     } else {
+      StopWatch watch = new StopWatch();
+      watch.start();
       // Global indexes GS1&GS2
       var gs1 =
           EnhancedGlobalSecondaryIndex.builder()
@@ -82,15 +83,14 @@ public class DynamoDBHandler {
               .indexName("GS2")
               .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
               .build();
-      customerTable.createTable(
-          CreateTableEnhancedRequest.builder()
-              // .globalSecondaryIndices(gs1, gs2)
-              .globalSecondaryIndices(gs1)
-              .build());
+      orderTable.createTable(
+          CreateTableEnhancedRequest.builder().globalSecondaryIndices(gs1, gs2).build());
 
       waitForTableCreated();
 
-      logger.info("Table created={}", this.tableName);
+      watch.stop();
+      logger.info(
+          "Table created={} in {} ms", this.tableName, watch.getTime(TimeUnit.MILLISECONDS));
 
       // Load sample data
       loadData(enhancedClient);
@@ -154,6 +154,4 @@ public class DynamoDBHandler {
   public QueryRequest.Builder queryRequestBuilder() {
     return QueryRequest.builder().tableName(tableName);
   }
-
-  
 }
