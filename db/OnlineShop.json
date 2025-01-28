@@ -1,0 +1,330 @@
+{
+  "ModelName": "OnlineShop",
+  "ModelMetadata": {
+    "Author": "Javier Ochoa",
+    "DateCreated": "May 05, 2023, 02:14 PM",
+    "DateLastModified": "May 08, 2023, 11:25 PM",
+    "Description": "Customer, Product and Orders in a single-table",
+    "AWSService": "Amazon DynamoDB",
+    "Version": "3.0"
+  },
+  "DataModel": [
+    {
+      "TableName": "onlineShop",
+      "KeyAttributes": {
+        "PartitionKey": {
+          "AttributeName": "PK",
+          "AttributeType": "S"
+        },
+        "SortKey": {
+          "AttributeName": "SK",
+          "AttributeType": "S"
+        }
+      },
+      "NonKeyAttributes": [
+        {
+          "AttributeName": "id",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "type",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "name",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "address",
+          "AttributeType": "M"
+        },
+        {
+          "AttributeName": "price",
+          "AttributeType": "N"
+        },
+        {
+          "AttributeName": "quantity",
+          "AttributeType": "N"
+        },
+        {
+          "AttributeName": "total",
+          "AttributeType": "N"
+        },
+        {
+          "AttributeName": "customer_id",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "GS1PK",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "GS1SK",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "GS2PK",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "GS2SK",
+          "AttributeType": "S"
+        }
+      ],
+      "GlobalSecondaryIndexes": [
+        {
+          "IndexName": "GS1",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "customer_id",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "GS1PK",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "ALL"
+          }
+        },
+        {
+          "IndexName": "GS2",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "GS1SK",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "GS2PK",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "ALL"
+          }
+        }
+      ],
+      "TableData": [
+        {
+          "PK": {
+            "S": "p#eeda0e24-abc2-46d1-96f6-863c7075c986"
+          },
+          "SK": {
+            "S": "p#eeda0e24-abc2-46d1-96f6-863c7075c986"
+          },
+          "id": {
+            "S": "eeda0e24-abc2-46d1-96f6-863c7075c986"
+          },
+          "type": {
+            "S": "PRODUCT"
+          },
+          "name": {
+            "S": "Qualitern est"
+          },
+          "price": {
+            "N": "321.99"
+          },
+          "GS1PK": {
+            "S": "product"
+          }
+        },
+        {
+          "PK": {
+            "S": "p#03c15c0b-37ab-4b1a-b78a-fc01d7923163"
+          },
+          "SK": {
+            "S": "p#03c15c0b-37ab-4b1a-b78a-fc01d7923163"
+          },
+          "id": {
+            "S": "03c15c0b-37ab-4b1a-b78a-fc01d7923163"
+          },
+          "type": {
+            "S": "PRODUCT"
+          },
+          "name": {
+            "S": "Sarasonic amet"
+          },
+          "price": {
+            "N": "24.16"
+          },
+          "GS1PK": {
+            "S": "product"
+          }
+        },
+        {
+          "PK": {
+            "S": "c#3cdcd0b9-ea76-4d8b-a367-6555cd6b134c"
+          },
+          "SK": {
+            "S": "c#3cdcd0b9-ea76-4d8b-a367-6555cd6b134c"
+          },
+          "id": {
+            "S": "3cdcd0b9-ea76-4d8b-a367-6555cd6b134c"
+          },
+          "type": {
+            "S": "CUSTOMER"
+          },
+          "name": {
+            "S": "Jimmie Duke"
+          },
+          "address": {
+            "M": {
+              "street": "Gallatin Place",
+              "city": "Ironton",
+              "state": "Kansas",
+              "zipcode": 26654
+            }
+          },
+          "GS1PK": {
+            "S": "customer"
+          }
+        },
+        {
+          "PK": {
+            "S": "c#01b3f619-78c2-4eb0-b2c9-983a8139231b"
+          },
+          "SK": {
+            "S": "c#01b3f619-78c2-4eb0-b2c9-983a8139231b"
+          },
+          "id": {
+            "S": "01b3f619-78c2-4eb0-b2c9-983a8139231b"
+          },
+          "type": {
+            "S": "CUSTOMER"
+          },
+          "name": {
+            "S": "Marisol Donovan"
+          },
+          "address": {
+            "M": {
+              "street": "Division Avenue",
+              "city": "Nelson",
+              "state": "New Hampshire",
+              "zipcode": 1555
+            }
+          },
+          "GS1PK": {
+            "S": "customer"
+          }
+        },
+        {
+          "PK": {
+            "S": "o#69f00ab6-3dc8-4339-8b4a-dc9153cffa99"
+          },
+          "SK": {
+            "S": "o#69f00ab6-3dc8-4339-8b4a-dc9153cffa99"
+          },
+          "id": {
+            "S": "69f00ab6-3dc8-4339-8b4a-dc9153cffa99"
+          },
+          "type": {
+            "S": "ORDER"
+          },
+          "total": {
+            "N": "120.8"
+          },
+          "customer_id": {
+            "S": "3cdcd0b9-ea76-4d8b-a367-6555cd6b134c"
+          },
+          "GS1PK": {
+            "S": "order"
+          },
+          "GS1SK": {
+            "S": "2020-05-07"
+          },
+          "GS2PK": {
+            "S": "c#3cdcd0b9-ea76-4d8b-a367-6555cd6b134c"
+          },
+          "GS2SK": {
+            "S": "o#69f00ab6-3dc8-4339-8b4a-dc9153cffa99"
+          }
+        },
+        {
+          "PK": {
+            "S": "o#69f00ab6-3dc8-4339-8b4a-dc9153cffa99"
+          },
+          "SK": {
+            "S": "c#3cdcd0b9-ea76-4d8b-a367-6555cd6b134c"
+          },
+          "id": {
+            "S": "3cdcd0b9-ea76-4d8b-a367-6555cd6b134c"
+          },
+          "type": {
+            "S": "CUSTOMER"
+          },
+          "name": {
+            "S": "Jimmie Duke"
+          },
+          "address": {
+            "M": {
+              "street": "Gallatin Place",
+              "city": "Ironton",
+              "state": "Kansas",
+              "zipcode": 26654
+            }
+          }
+        },
+        {
+          "PK": {
+            "S": "o#69f00ab6-3dc8-4339-8b4a-dc9153cffa99"
+          },
+          "SK": {
+            "S": "i#03c15c0b-37ab-4b1a-b78a-fc01d7923163"
+          },
+          "id": {
+            "S": "03c15c0b-37ab-4b1a-b78a-fc01d7923163"
+          },
+          "type": {
+            "S": "ITEM"
+          },
+          "name": {
+            "S": "Sarasonic amet"
+          },
+          "price": {
+            "N": "24.16"
+          },
+          "quantity": {
+            "N": "5"
+          },
+          "GS1PK": {
+            "S": "order_item"
+          },
+          "GS1SK": {
+            "S": "p#03c15c0b-37ab-4b1a-b78a-fc01d7923163"
+          }
+        }
+      ],
+      "DataAccess": {
+        "MySql": {}
+      },
+      "BillingMode": "PROVISIONED",
+      "ProvisionedCapacitySettings": {
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        },
+        "AutoScalingRead": {
+          "ScalableTargetRequest": {
+            "MinCapacity": 1,
+            "MaxCapacity": 10,
+            "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+          },
+          "ScalingPolicyConfiguration": {
+            "TargetValue": 70
+          }
+        },
+        "AutoScalingWrite": {
+          "ScalableTargetRequest": {
+            "MinCapacity": 1,
+            "MaxCapacity": 10,
+            "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+          },
+          "ScalingPolicyConfiguration": {
+            "TargetValue": 70
+          }
+        }
+      }
+    }
+  ]
+}
